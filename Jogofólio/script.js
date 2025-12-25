@@ -2,60 +2,9 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 
-// ===== IMAGENS =====
-const cityMap = new Image();
-cityMap.src = "assets/city_back.png";
-
-const playerImg = new Image();
-playerImg.src = "assets/player.gif";
-
-const cityFront = new Image();
-cityFront.src = "assets/city_front.png";
-
-const telescopeViewImg = new Image();
-telescopeViewImg.src = "assets/telescopio_visao.png"; // Altere para o seu caminho
-
-const cloudsImg = new Image();
-cloudsImg.src = "assets/clouds.png";
-
-const objectsImg = new Image();
-objectsImg.src = "assets/objects.png";
-
-const npc1Img = new Image(); 
-npc1Img.src = "assets/npc_moeda.png"; 
-
-const npc2Img = new Image(); 
-npc2Img.src = "assets/npc_fixo1.png";
-
-const npc3Img = new Image(); 
-npc3Img.src = "assets/npc_fixo2.png";
-
-const npc4FrontImg = new Image(); 
-npc4FrontImg.src = "assets/npc_pose_frente.png";
-
-const npc4DiagImg = new Image(); 
-npc4DiagImg.src = "assets/npc_pose_diag.png";
-
-// ===== CAMERA =====
-const camera = {
-  x: 0,
-  y: 0,
-  width: 960,
-  height: 540
-};
-
 const cityFrontOffset = {
   x: 0, // positivo = direita | negativo = esquerda
   y: 0    // positivo = baixo | negativo = cima
-};
-
-// ===== PLAYER =====
-const player = {
-  x: 0,
-  y: 0,
-  width: 32,
-  height: 32,
-  speed: 0.5
 };
 
 let teleportFading = false;
@@ -63,10 +12,6 @@ let teleportFadeOpacity = 0;
 let teleportStep = ""; // "out" | "in"
 let teleportWaitTime = 0; // contador de espera
 
-const spawnPoint = {
-  x: 520,
-  y: 964
-};
 
 const telescopeObj = { x: 1409, y: 682, width: 15, height: 16 };
 let isTelescopeOpen = false;
@@ -98,76 +43,6 @@ let fadeOpacity = 0;
 let isFading = false;
 let fadeTarget = ""; // "open", "show", "hide"
 
-// ===== CONTROLES =====
-const keys = {};
-window.addEventListener("keydown", e => keys[e.key] = true);
-window.addEventListener("keyup", e => keys[e.key] = false);
-
-window.addEventListener("keydown", e => {
-    if (e.key.toLowerCase() === "e" && !isFading) {
-        // 1. Se já tem um diálogo aberto, passa para a próxima frase
-        if (currentDialogue) {
-            dialogueIndex++;
-            if (dialogueIndex >= currentDialogue.length) {
-                currentDialogue = null; // Fecha o diálogo
-                dialogueIndex = 0;
-            }
-            return; // Encerra aqui para não abrir o telescópio ao mesmo tempo
-        }
-
-        // 2. Tenta conversar com algum NPC da lista
-        let interectedWithNpc = false;
-        npcs.forEach(npc => {
-            if (isPlayerNear(player, npc)) {
-                currentDialogue = npc.dialogue;
-                dialogueIndex = 0;
-                interectedWithNpc = true;
-
-                // Lógica da moeda
-                if (npc.id === "moeda" && !playerHasCoin) {
-                    playerHasCoin = true;
-                    console.log("Moeda coletada!");
-                }
-            }
-        });
-
-        if (interectedWithNpc) return; // Se falou com NPC, não tenta abrir o telescópio
-
-        // 3. Lógica do Telescópio
-        if (isTelescopeOpen) {
-            isFading = true;
-            fadeTarget = "hide";
-        } else if (isPlayerNear(player, telescopeObj)) {
-            if (playerHasCoin) {
-                isFading = true;
-                fadeTarget = "open";
-            } else {
-                console.log("Você precisa de uma moeda!");
-            }
-        }
-    }
-    keys[e.key] = true;
-});
-
-const ZOOM = 2; // Ajuste este número! (2 = dobro do tamanho, 3 = triplo, etc.)
-
-function resizeCanvas() {
-    // O tamanho visual continua sendo a janela toda (CSS cuida disso)
-    // Mas a resolução INTERNA do canvas será menor, criando o efeito de zoom
-    canvas.width = window.innerWidth / ZOOM;
-    canvas.height = window.innerHeight / ZOOM;
-
-    // A câmera agora segue o tamanho reduzido do canvas
-    camera.width = canvas.width;
-    camera.height = canvas.height;
-
-    // Importante: Desativar a suavização SEMPRE após mudar o tamanho do canvas
-    ctx.imageSmoothingEnabled = false;
-}
-
-// Faz o jogo se ajustar se você girar o celular ou mudar o tamanho da janela
-window.addEventListener("resize", resizeCanvas);
-
 // Função para checar proximidade (ajuste o 'dist' se precisar de mais alcance)
 function isPlayerNear(p, obj) {
     const dist = 20; 
@@ -188,34 +63,6 @@ function getNpc4Image(npc, player) {
     }
     return npc.imgFront;
 }
-
-// ===== INICIAR JOGO =====
-const TOTAL_ASSETS = 11; 
-let assetsLoaded = 0;
-
-function assetLoaded() {
-    assetsLoaded++;
-    console.log("Asset carregado: " + assetsLoaded + "/" + TOTAL_ASSETS);
-    if (assetsLoaded === TOTAL_ASSETS) {
-        resizeCanvas(); 
-        player.x = spawnPoint.x;
-        player.y = spawnPoint.y;
-        requestAnimationFrame(loop);
-    }
-}
-
-// Garanta que TODOS esses abaixo existam no seu código:
-cityMap.onload = assetLoaded;
-playerImg.onload = assetLoaded;
-cityFront.onload = assetLoaded;
-cloudsImg.onload = assetLoaded;
-telescopeViewImg.onload = assetLoaded;
-objectsImg.onload = assetLoaded;
-npc1Img.onload = assetLoaded;
-npc2Img.onload = assetLoaded;
-npc3Img.onload = assetLoaded;
-npc4FrontImg.onload = assetLoaded;
-npc4DiagImg.onload = assetLoaded;
 
 // ===== BARREIRAS =====
 const barriers = [
@@ -335,24 +182,6 @@ const cloudsAreas = [
   }
 ];
 
-function isInsideArea(player, area) {
-  return (
-    player.x < area.x + area.width &&
-    player.x + player.width > area.x &&
-    player.y < area.y + area.height &&
-    player.y + player.height > area.y
-  );
-}
-
-function isColliding(a, b) {
-  return (
-    a.x < b.x + b.width &&
-    a.x + a.width > b.x &&
-    a.y < b.y + b.height &&
-    a.y + a.height > b.y
-  );
-}
-
 function isPlayerBehindAnyBuilding(player, areas) {
   for (const area of areas) {
     if (
@@ -392,40 +221,6 @@ function update() {
 
 
   if (isTelescopeOpen) return; 
-
-  let nextX = player.x;
-  let nextY = player.y;
-
-  if (keys["ArrowUp"] || keys["w"]) nextY -= player.speed;
-  if (keys["ArrowDown"] || keys["s"]) nextY += player.speed;
-  if (keys["ArrowLeft"] || keys["a"]) nextX -= player.speed;
-  if (keys["ArrowRight"] || keys["d"]) nextX += player.speed;
-
-  // Hitbox nos pés
-  const hitHeight = 15;
-  const hitWidth = 18; 
-  const xOffset = (player.width - hitWidth) / 2; 
-  const yOffset = player.height - hitHeight; 
-
-  const futureHitbox = {
-    x: nextX + xOffset,
-    y: nextY + yOffset,
-    width: hitWidth,
-    height: hitHeight
-  };
-
-  let collided = false;
-  for (const barrier of barriers) {
-    if (isColliding(futureHitbox, barrier)) {
-      collided = true;
-      break;
-    }
-  }
-
-  if (!collided) {
-    player.x = nextX;
-    player.y = nextY;
-  }
 
   // ===== INICIAR TELEPORTE =====
   if (!teleportFading && isInsideArea(player, teleportArea)) {
@@ -475,12 +270,7 @@ function update() {
     return; // player totalmente travado durante tudo
   }
 
-
-  camera.x = player.x + player.width / 2 - camera.width / 2;
-  camera.y = player.y + player.height / 2 - camera.height / 2;
-
-  camera.x = Math.max(0, Math.min(camera.x, cityMap.width - camera.width));
-  camera.y = Math.max(0, Math.min(camera.y, cityMap.height - camera.height));
+  updatePlayer();
 }
 
 function draw() {
