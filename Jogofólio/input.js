@@ -5,6 +5,7 @@ window.addEventListener("keyup", e => keys[e.key] = false);
 
 window.addEventListener("keydown", e => {
     if (e.key.toLowerCase() === "e" && !isFading) {
+
         // 1. Se já tem um diálogo aberto, passa para a próxima frase
         if (currentDialogue) {
             dialogueIndex++;
@@ -12,6 +13,7 @@ window.addEventListener("keydown", e => {
                 currentDialogue = null; // Fecha o diálogo
                 dialogueIndex = 0;
             }
+
             return; // Encerra aqui para não abrir o telescópio ao mesmo tempo
         }
 
@@ -46,5 +48,7 @@ window.addEventListener("keydown", e => {
             }
         }
     }
+
     keys[e.key] = true;
+
 });

@@ -30,6 +30,7 @@ function isInsideArea(player, area) {
   );
 }
 
+
 function updatePlayer() {
     let nextX = player.x;
     let nextY = player.y;
@@ -41,10 +42,9 @@ function updatePlayer() {
 
     // Hitbox nos pés
     const hitHeight = 15;
-    const hitWidth = 18; 
-    const xOffset = (player.width - hitWidth) / 2; 
-    const yOffset = player.height - hitHeight; 
-
+    const hitWidth = 18;
+    const xOffset = (player.width - hitWidth) / 2;
+    const yOffset = player.height - hitHeight;
     const futureHitbox = {
         x: nextX + xOffset,
         y: nextY + yOffset,
@@ -65,6 +65,11 @@ function updatePlayer() {
         player.y = nextY;
     }
 
+    updateCamera();
+}
+
+// Camera
+function updateCamera() {
     camera.x = player.x + player.width / 2 - camera.width / 2;
     camera.y = player.y + player.height / 2 - camera.height / 2;
 
