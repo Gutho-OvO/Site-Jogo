@@ -15,6 +15,27 @@ cityFront.src = "assets/city_front.png";
 const telescopeViewImg = new Image();
 telescopeViewImg.src = "assets/telescopio_visao.png"; // Altere para o seu caminho
 
+const cloudsImg = new Image();
+cloudsImg.src = "assets/clouds.png";
+
+const objectsImg = new Image();
+objectsImg.src = "assets/objects.png";
+
+const npc1Img = new Image(); 
+npc1Img.src = "assets/npc_moeda.png"; 
+
+const npc2Img = new Image(); 
+npc2Img.src = "assets/npc_fixo1.png";
+
+const npc3Img = new Image(); 
+npc3Img.src = "assets/npc_fixo2.png";
+
+const npc4FrontImg = new Image(); 
+npc4FrontImg.src = "assets/npc_pose_frente.png";
+
+const npc4DiagImg = new Image(); 
+npc4DiagImg.src = "assets/npc_pose_diag.png";
+
 // ===== CAMERA =====
 const camera = {
   x: 0,
@@ -37,6 +58,11 @@ const player = {
   speed: 0.5
 };
 
+let teleportFading = false;
+let teleportFadeOpacity = 0;
+let teleportStep = ""; // "out" | "in"
+let teleportWaitTime = 0; // contador de espera
+
 const spawnPoint = {
   x: 520,
   y: 964
@@ -45,24 +71,81 @@ const spawnPoint = {
 const telescopeObj = { x: 1409, y: 682, width: 15, height: 16 };
 let isTelescopeOpen = false;
 
+const npcs = [
+  { 
+    id: "moeda", x: 2640, y: 342, width: 32, height: 32, img: npc1Img, 
+    dialogue: ["New..", "N-NEWT!!!!! A QUANTO TEMPO QUE EU NÃO TE VEJO", "Pera, que?", "E tu nem me avisou nada?", "Simples assim?", "Beleza viu.", "Faz tanto tempo que eu queria te ver mas tu me aparece justo quando eu to ocupado cara.", "Quer saber, tu deveria dar uma olhada nesse predio grande a sua esquerda.", "Pelo visto tem umas parada interessante lá.", "Bom, nois se ve por ai :)", "A, quase esqueci, pega essa moeda aqui, sei la vai que tu precisa."] 
+  },
+  { id: "fixo1", x: 298, y: 900, width: 32, height: 32, img: npc2Img, dialogue: ["Atenção cidadão.", "Essa area se encontra indisponivel no momento."] },
+  { id: "fixo2", x: 298, y: 1025, width: 32, height: 32, img: npc3Img, dialogue: ["O telescópio é incrível."] },
+  { 
+    id: "dinamico", x: 1480, y: 655, width: 32, height: 32, 
+    imgFront: npc4FrontImg, imgDiag: npc4DiagImg, 
+    dialogue: ["Opa bom dia, tu deve ser novo por aqui.", "Bem vindo a Riverviews, aqui ta só o pó da rabiola mas é bem bonito.", "Isso aqui é um observador, se tu quiser dar uma olhada na vista esteja a vontade, mas primeiro tu precisa de uma moeda.", "Eu aconselho tu dar uma olhada no predio rosa aqui do lado, tem umas coisas bacanas lá.."] 
+  }
+];
+
+// Controle de Diálogo
+let currentDialogue = null; // Quando null, ninguém está falando
+let dialogueIndex = 0;
+
+// --- NOVAS VARIÁVEIS ---
+let playerHasCoin = false; 
+const npcObj = { x: 600, y: 964, width: 32, height: 32 }; // Posição do NPC
+
+// Variáveis do Fade
+let fadeOpacity = 0;
+let isFading = false;
+let fadeTarget = ""; // "open", "show", "hide"
+
 // ===== CONTROLES =====
 const keys = {};
 window.addEventListener("keydown", e => keys[e.key] = true);
 window.addEventListener("keyup", e => keys[e.key] = false);
 
 window.addEventListener("keydown", e => {
-    if (e.key.toLowerCase() === "e") {
-        // Se estiver aberto, fecha
+    if (e.key.toLowerCase() === "e" && !isFading) {
+        // 1. Se já tem um diálogo aberto, passa para a próxima frase
+        if (currentDialogue) {
+            dialogueIndex++;
+            if (dialogueIndex >= currentDialogue.length) {
+                currentDialogue = null; // Fecha o diálogo
+                dialogueIndex = 0;
+            }
+            return; // Encerra aqui para não abrir o telescópio ao mesmo tempo
+        }
+
+        // 2. Tenta conversar com algum NPC da lista
+        let interectedWithNpc = false;
+        npcs.forEach(npc => {
+            if (isPlayerNear(player, npc)) {
+                currentDialogue = npc.dialogue;
+                dialogueIndex = 0;
+                interectedWithNpc = true;
+
+                // Lógica da moeda
+                if (npc.id === "moeda" && !playerHasCoin) {
+                    playerHasCoin = true;
+                    console.log("Moeda coletada!");
+                }
+            }
+        });
+
+        if (interectedWithNpc) return; // Se falou com NPC, não tenta abrir o telescópio
+
+        // 3. Lógica do Telescópio
         if (isTelescopeOpen) {
-            isTelescopeOpen = false;
-        } else {
-            // Se estiver fechado, verifica se o player está perto
-            if (isPlayerNear(player, telescopeObj)) {
-                isTelescopeOpen = true;
+            isFading = true;
+            fadeTarget = "hide";
+        } else if (isPlayerNear(player, telescopeObj)) {
+            if (playerHasCoin) {
+                isFading = true;
+                fadeTarget = "open";
+            } else {
+                console.log("Você precisa de uma moeda!");
             }
         }
     }
-    // Mantém sua lógica de movimentação
     keys[e.key] = true;
 });
 
@@ -96,30 +179,43 @@ function isPlayerNear(p, obj) {
     );
 }
 
+function getNpc4Image(npc, player) {
+    const dx = player.x - npc.x;
+    const dy = player.y - npc.y;
+    // Se o player estiver muito na diagonal (ex: dx e dy parecidos)
+    if (Math.abs(dx) > 10 && Math.abs(dy) > 10) {
+        return npc.imgDiag;
+    }
+    return npc.imgFront;
+}
+
 // ===== INICIAR JOGO =====
+const TOTAL_ASSETS = 11; 
 let assetsLoaded = 0;
-const TOTAL_ASSETS = 4;
-telescopeViewImg.onload = assetLoaded;
 
 function assetLoaded() {
     assetsLoaded++;
-
+    console.log("Asset carregado: " + assetsLoaded + "/" + TOTAL_ASSETS);
     if (assetsLoaded === TOTAL_ASSETS) {
-        // EM VEZ DE: canvas.width = camera.width...
-        // USE ISSO:
         resizeCanvas(); 
-
         player.x = spawnPoint.x;
         player.y = spawnPoint.y;
-
         requestAnimationFrame(loop);
     }
 }
 
-// registrar carregamento dos assets (FORA da função)
+// Garanta que TODOS esses abaixo existam no seu código:
 cityMap.onload = assetLoaded;
 playerImg.onload = assetLoaded;
 cityFront.onload = assetLoaded;
+cloudsImg.onload = assetLoaded;
+telescopeViewImg.onload = assetLoaded;
+objectsImg.onload = assetLoaded;
+npc1Img.onload = assetLoaded;
+npc2Img.onload = assetLoaded;
+npc3Img.onload = assetLoaded;
+npc4FrontImg.onload = assetLoaded;
+npc4DiagImg.onload = assetLoaded;
 
 // ===== BARREIRAS =====
 const barriers = [
@@ -190,6 +286,18 @@ const barriers = [
   { x: 1409, y: 682, width: 15, height: 16 },
 ];
 
+const teleportArea = {
+  x: 1311,
+  y: 1450,
+  width: 800,
+  height: 300
+};
+
+const teleportTarget = {
+  x: 1450,
+  y: 1225
+};
+
 const foregroundObjects = [
   {
     x: 1760,
@@ -215,8 +323,26 @@ const cityFrontAreas = [
     y: 670,
     width: 176,
     height: 25
+  },
+];
+
+const cloudsAreas = [
+  {
+    x: 1311,
+    y: 1347,
+    width: 800,
+    height: 300
   }
 ];
+
+function isInsideArea(player, area) {
+  return (
+    player.x < area.x + area.width &&
+    player.x + player.width > area.x &&
+    player.y < area.y + area.height &&
+    player.y + player.height > area.y
+  );
+}
 
 function isColliding(a, b) {
   return (
@@ -242,6 +368,29 @@ function isPlayerBehindAnyBuilding(player, areas) {
 }
 
 function update() {
+  if (currentDialogue) return; // Trava o movimento durante o diálogo
+
+  // --- LÓGICA DO FADE (ADICIONE AQUI) ---
+    if (isFading) {
+        if (fadeTarget === "open") {
+            fadeOpacity += 0.05; // Escurece
+            if (fadeOpacity >= 1) {
+                fadeOpacity = 1;
+                isTelescopeOpen = true; 
+                fadeTarget = "show"; // Agora vai clarear com o telescópio aberto
+            }
+        } else if (fadeTarget === "show" || fadeTarget === "hide") {
+            fadeOpacity -= 0.05; // Clareia
+            if (fadeOpacity <= 0) {
+                fadeOpacity = 0;
+                isFading = false;
+                if (fadeTarget === "hide") isTelescopeOpen = false;
+            }
+        }
+        return; // IMPORTANTE: Trava o player enquanto o fade acontece
+    }
+
+
   if (isTelescopeOpen) return; 
 
   let nextX = player.x;
@@ -278,6 +427,55 @@ function update() {
     player.y = nextY;
   }
 
+  // ===== INICIAR TELEPORTE =====
+  if (!teleportFading && isInsideArea(player, teleportArea)) {
+    teleportFading = true;
+    teleportStep = "out";
+    teleportFadeOpacity = 0;
+  }
+
+  // ===== FADE DE TELEPORTE COM ESPERA =====
+  if (teleportFading) {
+
+    // FADE OUT
+    if (teleportStep === "out") {
+      teleportFadeOpacity += 0.05;
+
+      if (teleportFadeOpacity >= 1) {
+        teleportFadeOpacity = 1;
+        teleportStep = "wait";
+        teleportWaitTime = 0; // reseta o tempo
+      }
+    }
+
+    // ESPERA 3 SEGUNDOS (≈ 180 frames)
+    else if (teleportStep === "wait") {
+      teleportWaitTime++;
+
+      if (teleportWaitTime >= 180) {
+        // TELEPORTA APÓS A ESPERA
+        player.x = teleportTarget.x;
+        player.y = teleportTarget.y;
+
+        teleportStep = "in";
+      }
+    }
+
+    // FADE IN
+    else if (teleportStep === "in") {
+      teleportFadeOpacity -= 0.05;
+
+      if (teleportFadeOpacity <= 0) {
+        teleportFadeOpacity = 0;
+        teleportFading = false;
+        teleportStep = "";
+      }
+    }
+
+    return; // player totalmente travado durante tudo
+  }
+
+
   camera.x = player.x + player.width / 2 - camera.width / 2;
   camera.y = player.y + player.height / 2 - camera.height / 2;
 
@@ -286,74 +484,160 @@ function update() {
 }
 
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // Forçar suavização desligada a cada frame (garante o pixel art)
-  ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Forçar suavização desligada para Pixel Art
+    ctx.imageSmoothingEnabled = false;
 
-  const camX = Math.floor(camera.x);
-  const camY = Math.floor(camera.y);
+    const camX = Math.floor(camera.x);
+    const camY = Math.floor(camera.y);
 
-  // 1. FUNDO (Destino deve ser o tamanho do canvas atual)
-  ctx.drawImage(
-    cityMap, 
-    camX, camY, camera.width, camera.height, // Corte (Source)
-    0, 0, canvas.width, canvas.height       // Destino (Canvas)
-  );
-
-  // 2. PLAYER
-  ctx.drawImage(
-    playerImg, 
-    Math.floor(player.x - camX), 
-    Math.floor(player.y - camY), 
-    player.width, player.height
-  );
-
-  // 3. FRENTE DO MAPA (PRÉDIOS)
-  const behindBuilding = isPlayerBehindAnyBuilding(player, cityFrontAreas);
-  ctx.save();
-  ctx.globalAlpha = behindBuilding ? 0.4 : 1;
-  ctx.drawImage(
-    cityFront, 
-    Math.max(0, camX), Math.max(0, camY), camera.width, camera.height, 
-    0, 0, canvas.width, canvas.height
-  );
-  ctx.restore();
-
-  // 4. INTERAÇÃO E OVERLAY
-  if (isTelescopeOpen) {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    let scale = Math.floor(canvas.height / telescopeViewImg.height);
-    if (scale < 1) scale = 1;
-
-    const imgW = telescopeViewImg.width * scale;
-    const imgH = telescopeViewImg.height * scale;
-
+    // 1. FUNDO
     ctx.drawImage(
-        telescopeViewImg,
-        Math.floor(canvas.width / 2 - imgW / 2),
-        Math.floor(canvas.height / 2 - imgH / 2),
-        imgW,
-        imgH
+        cityMap, 
+        camX, camY, camera.width, camera.height,
+        0, 0, canvas.width, canvas.height
     );
 
-    ctx.fillStyle = "white";
-    ctx.font = "12px 'Courier New', monospace"; // Fonte menor porque o canvas interno é pequeno
-    ctx.textAlign = "center";
-    ctx.fillText("Pressione [E] para sair", canvas.width / 2, (canvas.height / 2 + imgH / 2) + 15);
-  } else {
-    // Texto de "Interagir" quando perto
-    if (isPlayerNear(player, telescopeObj)) {
+    // 2. PLAYER (Desenhado antes dos NPCs e prédios)
+    ctx.drawImage(
+        playerImg, 
+        Math.floor(player.x - camX), 
+        Math.floor(player.y - camY), 
+        player.width, player.height
+    );
+
+    // 4. OBJETOS DO MAPA (objectsImg)
+    ctx.drawImage(objectsImg, camX, camY, camera.width, camera.height, 0, 0, canvas.width, canvas.height);
+
+    // 5. CAMADA DE PRÉDIOS (city_front) com transparência
+    const behindBuilding = isPlayerBehindAnyBuilding(player, cityFrontAreas);
+    ctx.save();
+    ctx.globalAlpha = behindBuilding ? 0.4 : 1;
+    ctx.drawImage(
+        cityFront,
+        camX, camY, camera.width, camera.height,
+        0, 0, canvas.width, canvas.height
+    );
+    ctx.restore();
+
+    // 6. CAMADA DE NUVENS
+    const behindClouds = isPlayerBehindAnyBuilding(player, cloudsAreas);
+    ctx.save();
+    ctx.globalAlpha = behindClouds ? 0.4 : 1;
+    ctx.drawImage(
+        cloudsImg,
+        camX, camY, camera.width, camera.height,
+        0, 0, canvas.width, canvas.height
+    );
+    ctx.restore();
+
+    // --- DESENHAR TODOS OS NPCS DA LISTA (Modo Debug) ---
+    npcs.forEach(npc => {
+      let imgToDraw = npc.img;
+      
+      if (npc.id === "dinamico") {
+          imgToDraw = getNpc4Image(npc, player);
+      }
+
+      // 2. DESENHA A IMAGEM POR CIMA
+      if (imgToDraw && imgToDraw.complete) {
+          ctx.drawImage(
+              imgToDraw,
+              Math.floor(npc.x - camX),
+              Math.floor(npc.y - camY),
+              npc.width,
+              npc.height
+          );
+      }
+
+      // 3. DESENHA O BALÃO [E] SE ESTIVER PERTO
+      if (isPlayerNear(player, npc)) {
+          ctx.fillStyle = "white";
+          ctx.font = "10px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText("[E] Falar", (npc.x + npc.width / 2) - camX, (npc.y - 5) - camY);
+      }
+    });
+
+    // 7. INTERFACE (Moeda no canto da tela)
+    if (playerHasCoin) {
+        ctx.fillStyle = "gold";
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText("🪙", 15, 30);
+    }
+
+    // 8. TELESCÓPIO (Overlay de visão)
+    if (isTelescopeOpen) {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let scale = Math.floor(canvas.height / telescopeViewImg.height);
+        if (scale < 1) scale = 1;
+
+        const imgW = telescopeViewImg.width * scale;
+        const imgH = telescopeViewImg.height * scale;
+
+        ctx.drawImage(
+            telescopeViewImg,
+            Math.floor(canvas.width / 2 - imgW / 2),
+            Math.floor(canvas.height / 2 - imgH / 2),
+            imgW,
+            imgH
+        );
+
         ctx.fillStyle = "white";
         ctx.font = "10px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("[E]", (player.x + player.width / 2) - camX, (player.y - 5) - camY);
+        ctx.fillText("Pressione [E] para sair", canvas.width / 2, (canvas.height / 2 + imgH / 2) + 15);
+    } else if (isPlayerNear(player, telescopeObj)) {
+        // Ícone de interagir no telescópio
+        ctx.fillStyle = "white";
+        ctx.font = "10px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("[E] Usar Telescópio", (telescopeObj.x + telescopeObj.width / 2) - camX, (telescopeObj.y - 5) - camY);
     }
-  }
 
-  
+    // 9. CAIXA DE DIÁLOGO (Sempre por cima de quase tudo)
+    drawDialogue();
+
+    // 10. FADES (Transições de tela)
+    if (fadeOpacity > 0) {
+        ctx.fillStyle = `rgba(0, 0, 0, ${fadeOpacity})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    if (teleportFadeOpacity > 0) {
+        ctx.fillStyle = `rgba(0, 0, 0, ${teleportFadeOpacity})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
+function drawDialogue() {
+    if (!currentDialogue) return;
+
+    const padding = 20;
+    const boxHeight = 80;
+    const boxY = canvas.height - boxHeight - 20;
+
+    // Fundo do Balão (Borda branca, fundo preto)
+    ctx.fillStyle = "white";
+    ctx.fillRect(padding - 2, boxY - 2, canvas.width - (padding * 2) + 4, boxHeight + 4);
+    ctx.fillStyle = "black";
+    ctx.fillRect(padding, boxY, canvas.width - (padding * 2), boxHeight);
+
+    // Texto
+    ctx.fillStyle = "white";
+    ctx.font = "14px 'Courier New', monospace";
+    ctx.textAlign = "left";
+    
+    // Mostra a linha atual do diálogo
+    const text = currentDialogue[dialogueIndex];
+    ctx.fillText(text, padding + 20, boxY + 35);
+    
+    ctx.font = "10px Arial";
+    ctx.fillText("Aperte [E] para continuar...", canvas.width - 150, boxY + boxHeight - 10);
 }
 
 function loop() {

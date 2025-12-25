@@ -12,9 +12,9 @@ body, html {
 }
 
 canvas {
-  display: block; /* Remove o espaço de respiro de texto na base */
-  width: 100vw;
-  height: 100vh;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    image-rendering: pixelated; /* Fundamental para Chrome/Edge */
+    image-rendering: crisp-edges; /* Fundamental para Firefox */
 }
