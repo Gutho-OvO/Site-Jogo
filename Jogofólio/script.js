@@ -91,16 +91,17 @@ function loop() {
 }
 
 function start() {
-    // Garante que as imagens carregaram e o canvas foi ajustado
-    if (assetsLoaded === TOTAL_ASSETS) {
-        resizeCanvas();
-        player.x = spawnPoint.x;
-        player.y = spawnPoint.y;
-        loop(); // Inicia o ciclo do jogo
-    } else {
-        // Se ainda não carregou, espera um pouco e tenta de novo
-        requestAnimationFrame(start);
+    if (!window.assetsReady) {
+       requestAnimationFrame(start);
+        return;
     }
+
+    resizeCanvas();
+
+    player.x = spawnPoint.x;
+    player.y = spawnPoint.y;
+
+    requestAnimationFrame(loop);
 }
 
 // Inicia o processo de checagem

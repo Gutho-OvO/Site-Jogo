@@ -1,9 +1,11 @@
+window.assetsReady = false;
+
 // Imagens
 const cityMap = new Image();
 cityMap.src = "assets/city_back.png";
 
 const playerImg = new Image();
-playerImg.src = "assets/player.gif";
+playerImg.src = "assets/player.png";
 
 const cityFront = new Image();
 cityFront.src = "assets/city_front.png";
@@ -38,12 +40,10 @@ let assetsLoaded = 0;
 
 function assetLoaded() {
     assetsLoaded++;
-    console.log("Asset carregado: " + assetsLoaded + "/" + TOTAL_ASSETS);
+    console.log(`Asset carregado: ${assetsLoaded}/${TOTAL_ASSETS}`);
+
     if (assetsLoaded === TOTAL_ASSETS) {
-        resizeCanvas();
-        player.x = spawnPoint.x;
-        player.y = spawnPoint.y;
-        requestAnimationFrame(loop);
+        window.assetsReady = true;
     }
 }
 

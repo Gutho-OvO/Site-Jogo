@@ -1,41 +1,38 @@
 // ===== CONTROLES =====
 const keys = {};
-window.addEventListener("keydown", e => keys[e.key] = true);
-window.addEventListener("keyup", e => keys[e.key] = false);
 
 window.addEventListener("keydown", e => {
+    keys[e.key.toLowerCase()] = true;
+
     if (e.key.toLowerCase() === "e" && !isFading) {
 
-        // 1. Se já tem um diálogo aberto, passa para a próxima frase
+        // 1. Avança diálogo
         if (currentDialogue) {
             dialogueIndex++;
             if (dialogueIndex >= currentDialogue.length) {
-                currentDialogue = null; // Fecha o diálogo
+                currentDialogue = null;
                 dialogueIndex = 0;
             }
-
-            return; // Encerra aqui para não abrir o telescópio ao mesmo tempo
+            return;
         }
 
-        // 2. Tenta conversar com algum NPC da lista
-        let interectedWithNpc = false;
+        // 2. Interação com NPC
+        let interacted = false;
         npcs.forEach(npc => {
             if (isPlayerNear(player, npc)) {
                 currentDialogue = npc.dialogue;
                 dialogueIndex = 0;
-                interectedWithNpc = true;
+                interacted = true;
 
-                // Lógica da moeda
                 if (npc.id === "moeda" && !playerHasCoin) {
                     playerHasCoin = true;
-                    console.log("Moeda coletada!");
                 }
             }
         });
 
-        if (interectedWithNpc) return; // Se falou com NPC, não tenta abrir o telescópio
+        if (interacted) return;
 
-        // 3. Lógica do Telescópio
+        // 3. Telescópio
         if (isTelescopeOpen) {
             isFading = true;
             fadeTarget = "hide";
@@ -43,12 +40,11 @@ window.addEventListener("keydown", e => {
             if (playerHasCoin) {
                 isFading = true;
                 fadeTarget = "open";
-            } else {
-                console.log("Você precisa de uma moeda!");
             }
         }
     }
+});
 
-    keys[e.key] = true;
-
+window.addEventListener("keyup", e => {
+    keys[e.key.toLowerCase()] = false;
 });

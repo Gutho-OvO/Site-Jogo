@@ -6,7 +6,7 @@ const camera = {
   height: 540
 };
 
-const ZOOM = 2;
+const ZOOM = 4;
 
 
 // Função resizeCanvas

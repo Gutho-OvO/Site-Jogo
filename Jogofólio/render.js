@@ -5,11 +5,37 @@ function draw() {
     const camX = Math.floor(camera.x);
     const camY = Math.floor(camera.y);
 
+    const directionMap = {
+        "down": 0,
+        "down-left": 1,
+        "left": 2,
+        "up-left": 3,
+        "up": 4,
+        "up-right": 5,
+        "right": 6,
+        "down-right": 7
+    };
+
     // 1. FUNDO
     ctx.drawImage(cityMap, camX, camY, camera.width, camera.height, 0, 0, canvas.width, canvas.height);
 
     // 2. PLAYER
-    ctx.drawImage(playerImg, Math.floor(player.x - camX), Math.floor(player.y - camY), player.width, player.height);
+    const row = directionMap[player.direction];
+
+    const sx = player.frame * 32;
+    const sy = row * 32;
+
+    ctx.drawImage(
+        playerImg,
+        sx,
+        sy,
+        32,
+        32,
+        Math.floor(player.x - camX),
+        Math.floor(player.y - camY),
+        32,
+        32
+    );
 
     // 3. OBJETOS DO MAPA
     ctx.drawImage(objectsImg, camX, camY, camera.width, camera.height, 0, 0, canvas.width, canvas.height);
