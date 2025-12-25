@@ -74,6 +74,7 @@ function draw() {
 
     drawDialogue();
     drawFades();
+
 }
 
 // Funções auxiliares de desenho para manter o draw() limpo

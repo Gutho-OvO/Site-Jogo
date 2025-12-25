@@ -25,6 +25,34 @@ function isPlayerNear(p, obj) {
     );
 }
 
+function checkDoors() {
+    if (!keys["e"]) return;
+
+    const playerFeet = {
+        x: player.x + (player.width - 18) / 2,
+        y: player.y + player.height - 15,
+        width: 18,
+        height: 15
+    };
+
+    for (const door of maps[currentMap].doors) {
+        if (isColliding(playerFeet, door)) {
+            changeMap(door);
+            break;
+        }
+    }
+}
+
+function changeMap(door) {
+    currentMap = door.targetMap;
+
+    player.x = door.targetSpawn.x;
+    player.y = door.targetSpawn.y;
+
+    camX = 0;
+    camY = 0;
+}
+
 function update() {
     if (currentDialogue) return; 
 

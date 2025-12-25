@@ -3,16 +3,24 @@ const barriers = [
   //ponte
   { x: 0, y: 0, width: 300, height: 1600 },
   { x: 300, y: 834, width: 1092, height: 40 },
-  { x: 300, y: 1107, width: 1109, height: 48 },
+  { x: 300, y: 1107, width: 1109, height: 40 },
   //barreiras
   { x: 1391, y: 644, width: 18, height: 214 },
   { x: 1409, y: 644, width: 384, height: 22 },
   { x: 1775, y: 430, width: 18, height: 214 },
   { x: 1295, y: 1147, width: 18, height: 350 },
   //barreira policia
-  { x: 2913, y: 714, width: 18, height: 448 },
+  { x: 2914, y: 682, width: 18, height: 480 },
   //objetos do mapa
   { x: 1793, y: 548, width: 112, height: 21 },
+  { x: 1797, y: 864, width: 6, height: 6 },
+  { x: 1797, y: 1073, width: 6, height: 6 },
+  { x: 2149, y: 816, width: 6, height: 6 },
+  { x: 2149, y: 1056, width: 6, height: 6 },
+  { x: 2309, y: 816, width: 6, height: 6 },
+  { x: 2309, y: 1056, width: 6, height: 6 },
+  { x: 2661, y: 848, width: 6, height: 6 },
+  { x: 2661, y: 1088, width: 6, height: 6 },
   //predio
   { x: 1904, y: 346, width: 16, height: 400 },
   { x: 1920, y: 727, width: 208, height: 16 },
@@ -63,9 +71,33 @@ const barriers = [
   { x: 2315, y: 678, width: 5, height: 1 },
   { x: 2317, y: 679, width: 3, height: 1 },
   { x: 2319, y: 680, width: 1, height: 1 },
-
+  //telescopio
   { x: 1409, y: 682, width: 15, height: 16 },
-
+  //npcs
+  { x: 2650, y: 365, width: 13, height: 13 },
+  { x: 1492, y: 666, width: 8, height: 24 },
+  { x: 310, y: 915, width: 8, height: 16 },
+  { x: 310, y: 1041, width: 8, height: 16 },
+  //predios-decoração
+  { x: 1616, y: 1194, width: 16, height: 414 },
+  { x: 1632, y: 1194, width: 464, height: 16 },
+  { x: 2096, y: 1194, width: 16, height: 48 },
+  { x: 2112, y: 1242, width: 16, height: 32 },
+  { x: 2128, y: 1258, width: 240, height: 16 },
+  { x: 2368, y: 1226, width: 16, height: 48 },
+  { x: 2384, y: 1226, width: 176, height: 16 },
+  { x: 2560, y: 1226, width: 16, height: 48 },
+  { x: 2576, y: 1258, width: 224, height: 16 },
+  { x: 2800, y: 1210, width: 16, height: 64 },
+  { x: 2816, y: 1162, width: 160, height: 64 },
+  //predio-beco
+  { x: 2768, y: 666, width: 30, height: 48 },
+  { x: 2798, y: 666, width: 116, height: 32 },
+  { x: 2818, y: 698, width: 14, height: 16 },
+  { x: 2880, y: 698, width: 14, height: 16 },
+  { x: 2672, y: 300, width: 96, height: 382 },
+  { x: 2623, y: 300, width: 48, height: 46 },
+  { x: 2688, y: 682, width: 48, height: 15 },
 ];
 
 const teleportArea = {

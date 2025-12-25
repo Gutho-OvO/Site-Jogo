@@ -4,12 +4,12 @@ const player = {
     y: 0,
     width: 32,
     height: 32,
-    speed: 0.5,
+    speed: 0.7,
 
     direction: "down",
     frame: 0,
     frameTimer: 0,
-    frameDelay: 20,
+    frameDelay: 25,
     moving: false
 };
 
