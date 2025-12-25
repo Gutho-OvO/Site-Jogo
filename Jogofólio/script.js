@@ -87,7 +87,6 @@ function update() {
 function loop() {
     update();
     draw(); // Esta função está no render.js
-    resizeCanvas(); // Esta está no camera.js
     requestAnimationFrame(loop);
 }
 
