@@ -2,17 +2,18 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 // Estados do Jogo
-let teleportFading = false;
-let teleportFadeOpacity = 0;
-let teleportStep = ""; 
-let teleportWaitTime = 0;
-let isTelescopeOpen = false;
-let currentDialogue = null;
-let dialogueIndex = 0;
-let playerHasCoin = false;
-let fadeOpacity = 0;
-let isFading = false;
-let fadeTarget = "";
+window.teleportFading = false;
+window.teleportFadeOpacity = 0;
+window.teleportStep = ""; 
+window.teleportWaitTime = 0;
+window.isTelescopeOpen = false;
+window.currentDialogue = null;
+window.dialogueIndex = 0;
+window.playerHasCoin = false;
+window.fadeOpacity = 0;
+window.isFading = false;
+window.fadeTarget = "";
+window.currentMap = "city";
 
 // Funções de utilidade
 function isPlayerNear(p, obj) {
@@ -23,34 +24,6 @@ function isPlayerNear(p, obj) {
         p.y < obj.y + obj.height + dist &&
         p.y + p.height > obj.y - dist
     );
-}
-
-function checkDoors() {
-    if (!keys["e"]) return;
-
-    const playerFeet = {
-        x: player.x + (player.width - 18) / 2,
-        y: player.y + player.height - 15,
-        width: 18,
-        height: 15
-    };
-
-    for (const door of maps[currentMap].doors) {
-        if (isColliding(playerFeet, door)) {
-            changeMap(door);
-            break;
-        }
-    }
-}
-
-function changeMap(door) {
-    currentMap = door.targetMap;
-
-    player.x = door.targetSpawn.x;
-    player.y = door.targetSpawn.y;
-
-    camX = 0;
-    camY = 0;
 }
 
 function update() {

@@ -17,7 +17,20 @@ function draw() {
     };
 
     // 1. FUNDO
-    ctx.drawImage(cityMap, camX, camY, camera.width, camera.height, 0, 0, canvas.width, canvas.height);
+    
+    let activeMap = currentMap === "city" ? cityMap : buildingMap;
+
+    ctx.drawImage(
+        activeMap,
+        camX,
+        camY,
+        camera.width,
+        camera.height,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
     // 2. PLAYER
     const row = directionMap[player.direction];
@@ -37,33 +50,36 @@ function draw() {
         32
     );
 
-    // 3. OBJETOS DO MAPA
-    ctx.drawImage(objectsImg, camX, camY, camera.width, camera.height, 0, 0, canvas.width, canvas.height);
+    if (currentMap === "city") {
+        // 3. OBJETOS DO MAPA
+        ctx.drawImage(objectsImg, camX, camY, camera.width, camera.height, 0, 0, canvas.width, canvas.height);
 
-    // 4. CAMADA DE PRÉDIOS (Com transparência)
-    const behindBuilding = isPlayerBehindAnyBuilding(player, cityFrontAreas);
-    ctx.save();
-    ctx.globalAlpha = behindBuilding ? 0.4 : 1;
-    ctx.drawImage(cityFront, camX, camY, camera.width, camera.height, 0, 0, canvas.width, canvas.height);
-    ctx.restore();
+        // 4. CAMADA DE PRÉDIOS (Com transparência)
+        const behindBuilding = isPlayerBehindAnyBuilding(player, cityFrontAreas);
+        ctx.save();
+        ctx.globalAlpha = behindBuilding ? 0.3 : 1;
+        ctx.drawImage(cityFront, camX, camY, camera.width, camera.height, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
 
-    // 5. NUVENS
-    const behindClouds = isPlayerBehindAnyBuilding(player, cloudsAreas);
-    ctx.save();
-    ctx.globalAlpha = behindClouds ? 0.4 : 1;
-    ctx.drawImage(cloudsImg, camX, camY, camera.width, camera.height, 0, 0, canvas.width, canvas.height);
-    ctx.restore();
+        // 5. NUVENS
+        const behindClouds = isPlayerBehindAnyBuilding(player, cloudsAreas);
+        ctx.save();
+        ctx.globalAlpha = behindClouds ? 0.3 : 1;
+        ctx.drawImage(cloudsImg, camX, camY, camera.width, camera.height, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
 
-    // 6. NPCs
-    npcs.forEach(npc => {
-        let imgToDraw = (npc.id === "dinamico") ? getNpc4Image(npc, player) : npc.img;
-        if (imgToDraw && imgToDraw.complete) {
-            ctx.drawImage(imgToDraw, Math.floor(npc.x - camX), Math.floor(npc.y - camY), npc.width, npc.height);
-        }
-        if (isPlayerNear(player, npc)) {
-            drawInteractionText("[E] Falar", npc.x, npc.y, camX, camY);
-        }
-    });
+        // 6. NPCs
+        npcs.forEach(npc => {
+            let imgToDraw = (npc.id === "dinamico") ? getNpc4Image(npc, player) : npc.img;
+            if (imgToDraw && imgToDraw.complete) {
+                ctx.drawImage(imgToDraw, Math.floor(npc.x - camX), Math.floor(npc.y - camY), npc.width, npc.height);
+            }
+            if (isPlayerNear(player, npc)) {
+                drawInteractionText("[E] Falar", npc.x, npc.y, camX, camY);
+            }
+        });
+    }
+    
 
     // 7. INTERFACE E OVERLAYS
     if (playerHasCoin) drawUI();
@@ -76,6 +92,7 @@ function draw() {
     drawFades();
 
 }
+
 
 // Funções auxiliares de desenho para manter o draw() limpo
 function drawInteractionText(text, x, y, camX, camY) {
@@ -123,5 +140,30 @@ function drawFades() {
     if (teleportFadeOpacity > 0) {
         ctx.fillStyle = `rgba(0, 0, 0, ${teleportFadeOpacity})`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
+function drawTelescopeView() {
+    // 1. Limpa o fundo com preto para dar foco à visão do telescópio
+    ctx.fillStyle = "#131313";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (telescopeViewImg.complete) {
+        // 2. Calcula as proporções para a imagem caber na tela (Letterbox)
+        const hRatio = canvas.width / telescopeViewImg.width;
+        const vRatio = canvas.height / telescopeViewImg.height;
+        const ratio  = Math.min(hRatio, vRatio); // Garante que a imagem caiba inteira
+        
+        const centerShiftX = (canvas.width - telescopeViewImg.width * ratio) / 2;
+        const centerShiftY = (canvas.height - telescopeViewImg.height * ratio) / 2;
+
+        // 3. Desenha a imagem adaptada
+        ctx.drawImage(
+            telescopeViewImg, 
+            0, 0, telescopeViewImg.width, telescopeViewImg.height,
+            centerShiftX, centerShiftY, 
+            telescopeViewImg.width * ratio, 
+            telescopeViewImg.height * ratio
+        );
     }
 }

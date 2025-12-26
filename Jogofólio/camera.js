@@ -18,14 +18,16 @@ function resizeCanvas() {
   ctx.imageSmoothingEnabled = false;
 }
 
-function updateCamera() {
+window.updateCamera = function() {
   camera.x = player.x + player.width / 2 - camera.width / 2;
   camera.y = player.y + player.height / 2 - camera.height / 2;
-  // Trava a câmera nas bordas do mapa (cityMap deve estar carregado)
-  camera.x = Math.max(0, Math.min(camera.x, cityMap.width - camera.width));
-  camera.y = Math.max(0, Math.min(camera.y, cityMap.height - camera.height));
+
+  const mapWidth  = currentMap === "city" ? cityMap.width  : buildingMap.width;
+  const mapHeight = currentMap === "city" ? cityMap.height : buildingMap.height;
+
+  camera.x = Math.max(0, Math.min(camera.x, mapWidth - camera.width));
+  camera.y = Math.max(0, Math.min(camera.y, mapHeight - camera.height));
 }
 
-// Só registra o evento
 window.addEventListener("resize", resizeCanvas);
 

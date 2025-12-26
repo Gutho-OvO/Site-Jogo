@@ -105,7 +105,7 @@ const teleportArea = {
 };
 
 const teleportTarget = {
-  x: 1450, y: 1225
+  x: 1450, y: 1150
 };
 
 // Áreas que deixam as coisas transparentes
@@ -154,3 +154,32 @@ function isPlayerBehindAnyBuilding(player, areas) {
   }
   return false;
 }
+
+// ===== PORTAS DO PRÉDIO =====
+const buildingDoors = [
+  {
+    id: "porta_esquerda",
+    x: 2156,
+    y: 665,
+    width: 34,
+    height: 4,
+    targetMap: "building",
+    spawn: { x: 1400, y: 650 }
+  },
+  {
+    id: "porta_direita",
+    x: 2274,
+    y: 665,
+    width: 34,
+    height: 4,
+    targetMap: "building",
+    spawn: { x: 1400, y: 650 }
+  }
+];
+
+const buildingBarriers = [
+  { x: 0, y: 0, width: 1, height: 1 },
+  { x: 0, y: 448, width: 1, height: 1 },
+  { x: 0, y: 0, width: 1, height: 1 },
+  { x: 950, y: 0, width: 1, height: 1 }
+];

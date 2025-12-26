@@ -32,6 +32,15 @@ window.addEventListener("keydown", e => {
 
         if (interacted) return;
 
+    // 🚪 PORTAS
+    buildingDoors.forEach(door => {
+        if (currentMap === "city" && isPlayerNear(player, door)) {
+            currentMap = door.targetMap;
+            player.x = door.spawn.x;
+            player.y = door.spawn.y;
+        }
+    });
+
         // 3. Telescópio
         if (isTelescopeOpen) {
             isFading = true;

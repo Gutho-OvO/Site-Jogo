@@ -34,8 +34,12 @@ npc4FrontImg.src = "assets/npc_pose_frente.png";
 const npc4DiagImg = new Image();
 npc4DiagImg.src = "assets/npc_pose_diag.png";
 
+const buildingMap = new Image();
+buildingMap.src = "assets/interior_predio.png";
+
+
 // controle de load
-const TOTAL_ASSETS = 11;
+const TOTAL_ASSETS = 12;
 let assetsLoaded = 0;
 
 function assetLoaded() {
@@ -59,3 +63,4 @@ npc2Img.onload = assetLoaded;
 npc3Img.onload = assetLoaded;
 npc4FrontImg.onload = assetLoaded;
 npc4DiagImg.onload = assetLoaded;
+buildingMap.onload = assetLoaded;

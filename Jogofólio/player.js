@@ -77,7 +77,10 @@ function updatePlayer() {
     };
 
     let collided = false;
-    for (const barrier of barriers) {
+
+    const activeBarriers = currentMap === "city" ? barriers : buildingBarriers;
+
+    for (const barrier of activeBarriers) {
         if (isColliding(hitbox, barrier)) {
             collided = true;
             break;
@@ -108,14 +111,4 @@ function updatePlayer() {
   }
 
     updateCamera();
-}
-
-// Camera
-function updateCamera() {
-    camera.x = player.x + player.width / 2 - camera.width / 2;
-    camera.y = player.y + player.height / 2 - camera.height / 2;
-
-    camera.x = Math.max(0, Math.min(camera.x, cityMap.width - camera.width));
-    camera.y = Math.max(0, Math.min(camera.y, cityMap.height - camera.height));
-
 }
