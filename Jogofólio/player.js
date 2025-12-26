@@ -4,12 +4,12 @@ const player = {
     y: 0,
     width: 32,
     height: 32,
-    speed: 0.6,
+    speed: 0.5,
 
     direction: "down",
     frame: 0,
     frameTimer: 0,
-    frameDelay: 26,
+    frameDelay: 25,
     moving: false
 };
 
@@ -29,23 +29,38 @@ function updatePlayer() {
     let dx = 0;
     let dy = 0;
 
-    if (keys["w"] || keys["arrowup"]) dy--;
-    if (keys["s"] || keys["arrowdown"]) dy++;
-    if (keys["a"] || keys["arrowleft"]) dx--;
-    if (keys["d"] || keys["arrowright"]) dx++;
+    // 🎬 RESTRIÇÃO DE MOVIMENTO NO CINEMA (apenas esquerda/direita)
+    if (currentMap === "cinema") {
+        if (keys["a"] || keys["arrowleft"]) dx--;
+        if (keys["d"] || keys["arrowright"]) dx++;
+        // Não permite movimento vertical no cinema
+    } else {
+        // Movimento normal em outros mapas
+        if (keys["w"] || keys["arrowup"]) dy--;
+        if (keys["s"] || keys["arrowdown"]) dy++;
+        if (keys["a"] || keys["arrowleft"]) dx--;
+        if (keys["d"] || keys["arrowright"]) dx++;
+    }
 
     player.moving = dx !== 0 || dy !== 0;
 
     // 🧭 DIREÇÃO
     if (player.moving) {
-        if (dx === 0 && dy === -1) player.direction = "up";
-        else if (dx === 0 && dy === 1) player.direction = "down";
-        else if (dx === -1 && dy === 0) player.direction = "left";
-        else if (dx === 1 && dy === 0) player.direction = "right";
-        else if (dx === -1 && dy === -1) player.direction = "up-left";
-        else if (dx === 1 && dy === -1) player.direction = "up-right";
-        else if (dx === -1 && dy === 1) player.direction = "down-left";
-        else if (dx === 1 && dy === 1) player.direction = "down-right";
+        // No cinema, força direção apenas horizontal
+        if (currentMap === "cinema") {
+            if (dx === -1) player.direction = "left";
+            else if (dx === 1) player.direction = "right";
+        } else {
+            // Movimento normal em outros mapas
+            if (dx === 0 && dy === -1) player.direction = "up";
+            else if (dx === 0 && dy === 1) player.direction = "down";
+            else if (dx === -1 && dy === 0) player.direction = "left";
+            else if (dx === 1 && dy === 0) player.direction = "right";
+            else if (dx === -1 && dy === -1) player.direction = "up-left";
+            else if (dx === 1 && dy === -1) player.direction = "up-right";
+            else if (dx === -1 && dy === 1) player.direction = "down-left";
+            else if (dx === 1 && dy === 1) player.direction = "down-right";
+        }
     }
 
     // 🔄 NORMALIZA DIAGONAL
@@ -60,7 +75,11 @@ function updatePlayer() {
     const nextY = player.y + dy * player.speed;
 
     // Seleciona as colisões do mapa atual
-    const activeCollisions = currentMap === "city" ? cityCollisions : buildingCollisions;
+    const activeCollisions = 
+        currentMap === "city" ? cityCollisions : 
+        currentMap === "building" ? buildingCollisions : 
+        currentMap === "room" ? roomCollisions :
+        cinemaCollisions;
 
     // 👣 HITBOX NOS PÉS (para verificação mais precisa)
     const hitboxX = {
@@ -82,8 +101,8 @@ function updatePlayer() {
         player.x = nextX;
     }
 
-    // Verifica colisão no eixo Y
-    if (!checkCollision(hitboxY, activeCollisions)) {
+    // Verifica colisão no eixo Y (não aplica no cinema)
+    if (currentMap !== "cinema" && !checkCollision(hitboxY, activeCollisions)) {
         player.y = nextY;
     }
 

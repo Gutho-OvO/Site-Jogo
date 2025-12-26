@@ -32,23 +32,71 @@ window.addEventListener("keydown", e => {
 
         if (interacted) return;
 
-    // 🚪 PORTAS
-    buildingDoors.forEach(door => {
-        if (currentMap === "city" && isPlayerNear(player, door)) {
-            currentMap = door.targetMap;
-            player.x = door.spawn.x;
-            player.y = door.spawn.y;
-        }
-    });
+        // 🚪 PORTAS CIDADE → PRÉDIO
+        buildingDoors.forEach(door => {
+            if (currentMap === "city" && isPlayerNear(player, door)) {
+                currentMap = door.targetMap;
+                player.x = door.spawn.x;
+                player.y = door.spawn.y;
+            }
+        });
 
-    // 🚪 SAÍDA DO PRÉDIO
-    buildingExitDoors.forEach(door => {
-        if (currentMap === "building" && isPlayerNear(player, door)) {
-            currentMap = door.targetMap;
-            player.x = door.spawn.x;
-            player.y = door.spawn.y;
+        // 🚪 SAÍDA DO PRÉDIO → CIDADE
+        buildingExitDoors.forEach(door => {
+            if (currentMap === "building" && isPlayerNear(player, door)) {
+                currentMap = door.targetMap;
+                player.x = door.spawn.x;
+                player.y = door.spawn.y;
+            }
+        });
+
+        // 🚪 PORTA PRÉDIO → SALA
+        if (currentMap === "building" && isPlayerNear(player, roomDoor)) {
+            currentMap = roomDoor.targetMap;
+            player.x = roomDoor.spawn.x;
+            player.y = roomDoor.spawn.y;
+            return;
         }
-    });
+
+        // 🚪 SAÍDA SALA → PRÉDIO
+        if (currentMap === "room" && isPlayerNear(player, roomExitDoor)) {
+            currentMap = roomExitDoor.targetMap;
+            player.x = roomExitDoor.spawn.x;
+            player.y = roomExitDoor.spawn.y;
+            return;
+        }
+
+        // 🎬 ENTRAR NO CINEMA
+        if (
+            currentMap === "building" &&
+            cinemaState === "closed" &&
+            isPlayerNear(player, cinemaArea)
+        ) {
+            currentMap = "cinema";
+            cinemaState = "watching";
+
+            player.x = cinemaSpawn.x;
+            player.y = cinemaSpawn.y;
+
+            cinemaOverlay.style.display = "flex";
+            cinemaIframe.src = CINEMA_YOUTUBE_URL;
+
+            return;
+        }
+
+        // 🚪 SAÍDA CINEMA → PRÉDIO (pressionar E)
+        if (currentMap === "cinema") {
+            cinemaIframe.src = "";
+            cinemaOverlay.style.display = "none";
+
+            cinemaState = "closed";
+            currentMap = "building";
+
+            player.x = cinemaExitSpawn.x;
+            player.y = cinemaExitSpawn.y;
+
+            return;
+        }
 
         // 3. Telescópio
         if (isTelescopeOpen) {
@@ -59,6 +107,13 @@ window.addEventListener("keydown", e => {
                 isFading = true;
                 fadeTarget = "open";
             }
+        }
+
+        // 4. Computador
+        if (isComputerOpen) {
+            isComputerOpen = false;
+        } else if (currentMap === "room" && isPlayerNear(player, computerObj)) {
+            isComputerOpen = true;
         }
     }
 });

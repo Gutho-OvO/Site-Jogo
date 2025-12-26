@@ -1,5 +1,5 @@
 // ===== DEBUG MODE =====
-window.showDebug = true; // Mude para false para desativar o debug
+window.showDebug = false; // Mude para false para desativar o debug
 const barriers = [
   //ponte
   { x: 0, y: 0, width: 300, height: 1600 },
@@ -109,7 +109,7 @@ const buildingBarriers = [
   { x: 437, y: 102, width: 14, height: 62 },
   { x: 451, y: 102, width: 96, height: 78 },
   //cima meio
-  { x: 399, y: 102, width: 38, height: 2 },
+  { x: 399, y: 102, width: 38, height: 11 },
   //parede esquerda
   { x: 251, y: 210, width: 22, height: 233 },//grandona
   { x: 273, y: 102, width: 16, height: 108 },//retangulo cima
@@ -126,9 +126,54 @@ const buildingBarriers = [
   { x: 273, y: 538, width: 290, height: 16 },
 ];
 
+// ===== BARREIRAS DA SALA =====
+const roomBarriers = [
+  // Adicione as barreiras da sala aqui depois
+  // Por enquanto apenas paredes básicas
+  { x: 0, y: 210, width: 800, height: 20 },
+  { x: 289, y: 0, width: 20, height: 600 },
+  { x: 555, y: 0, width: 20, height: 600 },
+  { x: 0, y: 416, width: 800, height: 20 },
+  { x: 519, y: 0, width: 36, height: 376 },
+  //mesas pri fileira
+  { x: 311, y: 342, width: 12, height: 16 },
+  { x: 311, y: 295, width: 12, height: 16 },
+  { x: 311, y: 247, width: 12, height: 16 },
+  //mesas pri fileira hrz
+  { x: 323, y: 352, width: 33, height: 6 },
+  { x: 323, y: 305, width: 33, height: 6 },
+  { x: 323, y: 257, width: 33, height: 6 },
+  //mesas seg fileira
+  { x: 391, y: 342, width: 12, height: 16 },
+  { x: 391, y: 295, width: 12, height: 16 },
+  { x: 391, y: 247, width: 12, height: 16 },
+  //mesas sec fileira hrz
+  { x: 403, y: 352, width: 33, height: 6 },
+  { x: 403, y: 305, width: 33, height: 6 },
+  { x: 403, y: 257, width: 33, height: 6 },
+  //mesas ter fileira
+  { x: 505, y: 342, width: 12, height: 16 },
+  { x: 505, y: 295, width: 12, height: 16 },
+  { x: 505, y: 247, width: 12, height: 16 },
+  //mesas ter fileira hrz
+  { x: 472, y: 352, width: 33, height: 6 },
+  { x: 472, y: 305, width: 33, height: 6 },
+  { x: 472, y: 257, width: 33, height: 6 },
+
+];
+
+// ===== BARREIRAS DO CINEMA =====
+// Barreiras laterais para o player não sair da tela
+const cinemaBarriers = [
+  { x: 10, y: 0, width: 16, height: 9999 },      // parede esquerda
+  { x: 9999, y: 0, width: 50, height: 9999 },   // parede direita (será ajustada dinamicamente)
+];
+
 // Arrays de colisões para cada mapa
 const cityCollisions = barriers;
 const buildingCollisions = buildingBarriers;
+const roomCollisions = roomBarriers;
+const cinemaCollisions = cinemaBarriers;
 
 // Área de teleporte
 const teleportArea = {
@@ -150,6 +195,43 @@ const cloudsAreas = [
 ];
 
 const telescopeObj = { x: 1409, y: 682, width: 15, height: 16 };
+
+// ===== COMPUTADOR =====
+const computerObj = { x: 412, y: 297, width: 5, height: 5 };
+
+// Ícones do computador (posição na tela do computador)
+const computerIcons = [
+  {
+    id: "icon1",
+    x: 100,
+    y: 80,
+    width: 80,
+    height: 100,
+    label: "Portfolio",
+    url: "https://gutho-ovo.github.io/Pagina-Pessoal/", // Substitua pelo seu link
+    icon: "📁"
+  },
+  {
+    id: "icon2",
+    x: 220,
+    y: 80,
+    width: 80,
+    height: 100,
+    label: "GitHub",
+    url: "https://github.com", // Substitua pelo seu link
+    icon: "💻"
+  },
+  {
+    id: "icon3",
+    x: 340,
+    y: 80,
+    width: 80,
+    height: 100,
+    label: "abluble",
+    url: "https://www.youtube.com/watch?v=Bu7muZaoTUQ", // Substitua pelo seu link
+    icon: "💼"
+  }
+];
 
 const foregroundObjects = [
   {
@@ -206,6 +288,42 @@ const buildingExitDoors = [
     spawn: { x: 2274, y: 690 }
   }
 ];
+
+// ===== PORTA DA SALA (PRÉDIO → SALA) =====
+const roomDoor = {
+  id: "porta_sala",
+  x: 251,
+  y: 305,
+  width: 24,
+  height: 42,
+  targetMap: "room",
+  spawn: { x: 515, y: 380 } // ajuste conforme necessário
+};
+
+// ===== SAÍDA DA SALA (SALA → PRÉDIO) =====
+const roomExitDoor = {
+  id: "saida_sala",
+  x: 550,
+  y: 378, // ajuste para onde fica a saída na sala
+  width: 5,
+  height: 32,
+  targetMap: "building",
+  spawn: { x: 275, y: 310 } // volta pro prédio
+};
+
+// ===== PORTA DO CINEMA (PRÉDIO → CINEMA) =====
+const cinemaArea = {
+  id: "area_cinema",
+  x: 399,
+  y: 115,
+  width: 38,
+  height: 8
+};
+
+const cinemaSpawn = { x: 430, y: 285 };
+
+// ===== SAÍDA DO CINEMA (CINEMA → PRÉDIO) =====
+const cinemaExitSpawn = { x: 399, y: 130 };
 
 // ===== FUNÇÕES DE COLISÃO =====
 
