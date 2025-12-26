@@ -85,7 +85,7 @@ function draw() {
     if (playerHasCoin) drawUI();
     if (isTelescopeOpen) drawTelescopeView();
     else if (isPlayerNear(player, telescopeObj)) {
-        drawInteractionText("[E] Usar Telescópio", telescopeObj.x, telescopeObj.y, camX, camY);
+        drawInteractionText("[E] Usar", telescopeObj.x, telescopeObj.y, camX, camY);
     }
 
     drawDialogue();
@@ -105,7 +105,7 @@ function drawInteractionText(text, x, y, camX, camY) {
 function drawUI() {
     ctx.fillStyle = "gold";
     ctx.font = "bold 20px Arial";
-    ctx.fillText("🪙", 15, 30);
+    ctx.fillText("🪙", 30, 30);
 }
 
 function drawDialogue() {

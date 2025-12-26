@@ -164,7 +164,7 @@ const buildingDoors = [
     width: 34,
     height: 4,
     targetMap: "building",
-    spawn: { x: 1400, y: 650 }
+    spawn: { x: 344, y: 500 }
   },
   {
     id: "porta_direita",
@@ -173,7 +173,7 @@ const buildingDoors = [
     width: 34,
     height: 4,
     targetMap: "building",
-    spawn: { x: 1400, y: 650 }
+    spawn: { x: 460, y: 500 }
   }
 ];
 
