@@ -41,6 +41,15 @@ window.addEventListener("keydown", e => {
         }
     });
 
+    // 🚪 SAÍDA DO PRÉDIO
+    buildingExitDoors.forEach(door => {
+        if (currentMap === "building" && isPlayerNear(player, door)) {
+            currentMap = door.targetMap;
+            player.x = door.spawn.x;
+            player.y = door.spawn.y;
+        }
+    });
+
         // 3. Telescópio
         if (isTelescopeOpen) {
             isFading = true;

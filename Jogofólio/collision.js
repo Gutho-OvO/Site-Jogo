@@ -1,4 +1,5 @@
-// ===== BARREIRAS =====
+// ===== DEBUG MODE =====
+window.showDebug = true; // Mude para false para desativar o debug
 const barriers = [
   //ponte
   { x: 0, y: 0, width: 300, height: 1600 },
@@ -100,6 +101,36 @@ const barriers = [
   { x: 2688, y: 682, width: 48, height: 15 },
 ];
 
+const buildingBarriers = [
+  //cima esquerda
+  { x: 385, y: 102, width: 14, height: 62 },
+  { x: 289, y: 102, width: 96, height: 78 },
+  //cima direita
+  { x: 437, y: 102, width: 14, height: 62 },
+  { x: 451, y: 102, width: 96, height: 78 },
+  //cima meio
+  { x: 399, y: 102, width: 38, height: 2 },
+  //parede esquerda
+  { x: 251, y: 210, width: 22, height: 233 },//grandona
+  { x: 273, y: 102, width: 16, height: 108 },//retangulo cima
+  { x: 273, y: 251, width: 16, height: 54 },//divisao cima
+  { x: 273, y: 347, width: 16, height: 54 },//divisao baixo
+  { x: 273, y: 443, width: 16, height: 93 },//retangulo baixo
+  //parede direita
+  { x: 563, y: 210, width: 22, height: 233 },//grandona
+  { x: 547, y: 102, width: 16, height: 108 },//retangulo cima
+  { x: 547, y: 251, width: 16, height: 54 },//divisao cima
+  { x: 547, y: 347, width: 16, height: 54 },//divisao baixo
+  { x: 547, y: 443, width: 16, height: 93 },//retangulo baixo
+  //parede porta
+  { x: 273, y: 538, width: 290, height: 16 },
+];
+
+// Arrays de colisões para cada mapa
+const cityCollisions = barriers;
+const buildingCollisions = buildingBarriers;
+
+// Área de teleporte
 const teleportArea = {
   x: 1311, y: 1450, width: 800, height: 300
 };
@@ -132,6 +163,53 @@ const foregroundObjects = [
 ];
 foregroundObjects[0].img.src = "assets/city_front.png";
 
+// ===== PORTAS DO PRÉDIO =====
+const buildingDoors = [
+  {
+    id: "porta_esquerda",
+    x: 2156,
+    y: 665,
+    width: 34,
+    height: 4,
+    targetMap: "building",
+    spawn: { x: 344, y: 450 }
+  },
+  {
+    id: "porta_direita",
+    x: 2274,
+    y: 665,
+    width: 34,
+    height: 4,
+    targetMap: "building",
+    spawn: { x: 460, y: 450 }
+  }
+];
+
+// ===== SAÍDAS DO PRÉDIO (INTERIOR → CIDADE) =====
+const buildingExitDoors = [
+  {
+    id: "saida_esquerda",
+    x: 335,
+    y: 545,
+    width: 30,
+    height: 20,
+    targetMap: "city",
+    spawn: { x: 2156, y: 690 }
+  },
+  {
+    id: "saida_direita",
+    x: 470,
+    y: 545,
+    width: 30,
+    height: 20,
+    targetMap: "city",
+    spawn: { x: 2274, y: 690 }
+  }
+];
+
+// ===== FUNÇÕES DE COLISÃO =====
+
+// Verifica se dois objetos estão colidindo (AABB)
 function isColliding(a, b) {
     return (
         a.x < b.x + b.width &&
@@ -141,6 +219,7 @@ function isColliding(a, b) {
     );
 }
 
+// Verifica se o player está atrás de qualquer área (para transparência)
 function isPlayerBehindAnyBuilding(player, areas) {
   for (const area of areas) {
     if (
@@ -155,31 +234,13 @@ function isPlayerBehindAnyBuilding(player, areas) {
   return false;
 }
 
-// ===== PORTAS DO PRÉDIO =====
-const buildingDoors = [
-  {
-    id: "porta_esquerda",
-    x: 2156,
-    y: 665,
-    width: 34,
-    height: 4,
-    targetMap: "building",
-    spawn: { x: 344, y: 500 }
-  },
-  {
-    id: "porta_direita",
-    x: 2274,
-    y: 665,
-    width: 34,
-    height: 4,
-    targetMap: "building",
-    spawn: { x: 460, y: 500 }
+// Função principal de verificação de colisão
+// Verifica se um objeto está colidindo com alguma barreira da lista
+function checkCollision(obj, collisionList) {
+  for (const barrier of collisionList) {
+    if (isColliding(obj, barrier)) {
+      return true; // Colidiu
+    }
   }
-];
-
-const buildingBarriers = [
-  { x: 0, y: 0, width: 1, height: 1 },
-  { x: 0, y: 448, width: 1, height: 1 },
-  { x: 0, y: 0, width: 1, height: 1 },
-  { x: 950, y: 0, width: 1, height: 1 }
-];
+  return false; // Não colidiu
+}

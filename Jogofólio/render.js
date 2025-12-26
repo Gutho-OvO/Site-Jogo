@@ -80,6 +80,63 @@ function draw() {
         });
     }
     
+    // 🔴 DEBUG - PORTAS E BARREIRAS
+    if (window.showDebug) {
+        ctx.save();
+        
+        // Portas de entrada (azul - cidade)
+        if (currentMap === "city") {
+            ctx.fillStyle = "rgba(0, 0, 255, 0.6)";
+            buildingDoors.forEach(door => {
+                ctx.fillRect(
+                    door.x - camX,
+                    door.y - camY,
+                    door.width,
+                    door.height
+                );
+            });
+        }
+
+        // Portas de saída (vermelho - prédio)
+        if (currentMap === "building") {
+            ctx.fillStyle = "rgba(255, 0, 0, 0.6)";
+            buildingExitDoors.forEach(door => {
+                ctx.fillRect(
+                    door.x - camX,
+                    door.y - camY,
+                    door.width,
+                    door.height
+                );
+            });
+        }
+
+        // 🟩 BARREIRAS (verde)
+        const activeBarriers = currentMap === "city" ? barriers : buildingBarriers;
+        
+        ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
+        activeBarriers.forEach(barrier => {
+            ctx.fillRect(
+                barrier.x - camX,
+                barrier.y - camY,
+                barrier.width,
+                barrier.height
+            );
+        });
+
+        // Contorno das barreiras
+        ctx.strokeStyle = "lime";
+        ctx.lineWidth = 2;
+        activeBarriers.forEach(barrier => {
+            ctx.strokeRect(
+                barrier.x - camX,
+                barrier.y - camY,
+                barrier.width,
+                barrier.height
+            );
+        });
+
+        ctx.restore();
+    }
 
     // 7. INTERFACE E OVERLAYS
     if (playerHasCoin) drawUI();

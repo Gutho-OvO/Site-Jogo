@@ -4,25 +4,16 @@ const player = {
     y: 0,
     width: 32,
     height: 32,
-    speed: 0.7,
+    speed: 0.6,
 
     direction: "down",
     frame: 0,
     frameTimer: 0,
-    frameDelay: 25,
+    frameDelay: 26,
     moving: false
 };
 
-const spawnPoint = { x: 520, y: 964 };
-
-function isColliding(a, b) {
-  return (
-    a.x < b.x + b.width &&
-    a.x + a.width > b.x &&
-    a.y < b.y + b.height &&
-    a.y + a.height > b.y
-  );
-}
+const spawnPoint = { x: 1700, y: 964 };
 
 function isInsideArea(player, area) {
   return (
@@ -68,47 +59,50 @@ function updatePlayer() {
     const nextX = player.x + dx * player.speed;
     const nextY = player.y + dy * player.speed;
 
-    // 👣 HITBOX NOS PÉS
-    const hitbox = {
+    // Seleciona as colisões do mapa atual
+    const activeCollisions = currentMap === "city" ? cityCollisions : buildingCollisions;
+
+    // 👣 HITBOX NOS PÉS (para verificação mais precisa)
+    const hitboxX = {
         x: nextX + (player.width - 18) / 2,
+        y: player.y + player.height - 15,
+        width: 18,
+        height: 15
+    };
+
+    const hitboxY = {
+        x: player.x + (player.width - 18) / 2,
         y: nextY + player.height - 15,
         width: 18,
         height: 15
     };
 
-    let collided = false;
-
-    const activeBarriers = currentMap === "city" ? barriers : buildingBarriers;
-
-    for (const barrier of activeBarriers) {
-        if (isColliding(hitbox, barrier)) {
-            collided = true;
-            break;
-        }
+    // Verifica colisão no eixo X
+    if (!checkCollision(hitboxX, activeCollisions)) {
+        player.x = nextX;
     }
 
-    // 🚧 APLICA MOVIMENTO
-    if (!collided) {
-        player.x = nextX;
+    // Verifica colisão no eixo Y
+    if (!checkCollision(hitboxY, activeCollisions)) {
         player.y = nextY;
     }
 
     // 🎞️ ANIMAÇÃO
-  if (player.moving && !collided) {
-      player.frameTimer++;
+    if (player.moving) {
+        player.frameTimer++;
 
-      if (player.frameTimer >= player.frameDelay) {
-          player.frame++;
+        if (player.frameTimer >= player.frameDelay) {
+            player.frame++;
 
-          if (player.frame > 4) {
-              player.frame = 1; // volta para primeiro frame andando
-          }
+            if (player.frame > 4) {
+                player.frame = 1; // volta para primeiro frame andando
+            }
 
-          player.frameTimer = 0;
-      }
-  } else {
-      player.frame = 0; // parado
-  }
+            player.frameTimer = 0;
+        }
+    } else {
+        player.frame = 0; // parado
+    }
 
     updateCamera();
 }
